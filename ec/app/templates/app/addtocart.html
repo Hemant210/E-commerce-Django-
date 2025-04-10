@@ -1,0 +1,86 @@
+
+{% extends 'app/base.html' %}
+{% load static %}
+{% block title %}Cart{% endblock title %}
+{% block main-content %}
+
+<div class="container my-5">
+    {% if messages %}
+    {% for msg in messages %}
+     <div class="alert alert-danger" role='alert'>
+        {{msg}}
+     </div>
+     {% endfor %}
+     {% endif %}
+    {% if cart %}
+        <h1 class="text-center mb-5">Shopping Cart</h1>
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        {% for item in cart %}
+                            <div class="row align-items-center mb-4">
+                                <div class="col-sm-3 text-center">
+                                    <img src="{{ item.products.product_image.url }}" 
+                                         alt="{{ item.products.title }}" 
+                                         class="img-fluid img-thumbnail" 
+                                         style="max-height: 150px; max-width: 150px;">
+                                </div>
+                                <div class="col-sm-9">
+                                    <h5 class="fw-bold">{{ item.products.title }}</h5>
+                                    <p class="text-muted small mb-2">{{ item.products.description }}</p>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <label class="me-3">Quantity:</label>
+                                        <button class="btn btn-outline-secondary btn-sm minus-cart" pid="{{ item.products.id }}">
+                                            <i class="fas fa-minus"></i>
+                                        </button>
+                                        <span id="quantity" class="mx-3">{{ item.quantity }}</span>
+                                        <button class="btn btn-outline-secondary btn-sm plus-cart" pid="{{ item.products.id }}">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <button class="btn btn-danger btn-sm remove-cart" pid="{{ item.products.id }}">Remove</button>
+                                        <span class="fw-bold">Rs. {{ item.products.discounted_price }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="text-muted">
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h3 class="fw-bold">Order Summary</h3>
+                        <ul class="list-group mb-4">
+                            <li class="list-group-item d-flex justify-content-between border-0 px-0 pb-0">
+                                <span>Subtotal:</span>
+                                <span id="amount">Rs. {{ amount }}</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between px-0">
+                                <span>Shipping:</span>
+                                <span>Rs. 40.00</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between border-0 px-0 pb-0">
+                                <strong>Total (incl. GST):</strong>
+                                <strong id="totalamount">Rs. {{ totalamount }}</strong>
+                            </li>
+                        </ul>
+                        <div class="d-grid">
+                            <a href="{% url 'checkout' %}" class="btn btn-primary">Place Order</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="text-center">
+            <h1 class="mb-5">Your Cart is Empty</h1>
+        </div>
+    {% endif %}
+</div>
+
+<script src="{% static 'app/js/myscript.js' %}"></script>
+{% endblock main-content %}

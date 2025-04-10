@@ -1,0 +1,46 @@
+{% extends 'app/base.html' %}
+{% load static %}
+
+{% block title %}Customer Registration{% endblock title %}
+
+{% block main-content %}
+<div class="container">
+    <div class="row my-5">
+        <div class="col-sm-6 offset-sm-3">
+            <h2 class="text-center mb-4">Customer Registration</h2>
+            <hr>
+
+            <!-- Displaying Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} my-3">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Registration Form -->
+            <form action="" method="post" class="shadow p-4 rounded bg-light">
+                {% csrf_token %}
+                
+                {% for fm in form %}
+                    <div class="mb-3 text-dark">
+                        {{ fm.label_tag }}
+                        {{ fm }}
+                        {% if fm.errors %}
+                            <small class="text-danger">{{ fm.errors|striptags }}</small>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+            
+            <!-- Login Redirect -->
+            <div class="text-center text-primary fw-bold mt-4">
+                <small>Already registered?  <a href="{% url 'login' %}" class="text-danger">Login now</a></small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main-content %}

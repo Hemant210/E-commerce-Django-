@@ -1,0 +1,19 @@
+.navbar {
+    background: linear-gradient(to right, #004d40, #00796b);
+  }
+  
+  .nav-link, .navbar-brand {
+    color: #fff !important;
+  }
+  
+  .navbar-toggler {
+    border: none;
+  }
+  
+  .navbar .badge {
+    font-size: 0.75rem;
+    padding: 4px 7px;
+    vertical-align: top;
+    margin-left: 3px;
+  }
+  

@@ -1,0 +1,64 @@
+{% extends 'app/base.html' %}
+{% load static %}
+
+{% block title %}Address{% endblock title %}
+
+{% block main-content %}
+<div class="container my-5">
+    <div class="row">
+        <!-- Welcome Section -->
+        <h3>Welcome, <span class="text-capitalize">{{ request.user }}</span></h3>
+
+        <!-- Sidebar Menu -->
+        <div class="col-md-3 col-sm-4 border-end">
+            <ul class="list-unstyled">
+                <li class="d-grid mb-2">
+                    <a href="{% url 'profile' %}" class="btn btn-outline-primary">Profile</a>
+                </li>
+                <li class="d-grid">
+                    <a href="{% url 'address' %}" class="btn btn-primary">Address</a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Address List -->
+        <div class="col-md-9 col-sm-6">
+            {% if messages %}
+                <div class="alert alert-success">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <div class="row">
+                {% if add %}
+                    {% for ad in add %}
+                    <div class="col-lg-6 col-md-12 my-3">
+                        <div class="card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">Address {{ forloop.counter }}</h5>
+                                <p><strong>Name:</strong> {{ ad.name }}</p>
+                                <p><strong>Address:</strong> {{ ad.locality }}</p>
+                                <p><strong>City:</strong> {{ ad.city }}</p>
+                                <p><strong>Mobile:</strong> {{ ad.mobile }}</p>
+                                <p><strong>Pincode:</strong> {{ ad.zipcode }}</p>
+                                <div class="text-center">
+                                    <a href="{% url 'updateAddress' pk=ad.id %}" class="btn btn-success">
+                                        <i class="bi bi-pencil-square"></i> Update
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12 text-center my-5">
+                        <p class="text-muted">No addresses available. Please add an address in your profile.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main-content %}

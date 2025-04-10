@@ -1,0 +1,190 @@
+{% extends 'app/base.html' %}
+
+{% load static %}
+
+{% block title %}Contact Us | Patil Dairy{% endblock %}
+
+{% block banner_slider %}
+<div id="contactCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <div class="carousel-caption d-none d-md-block">
+                <h5 class="carousel-title">Get in Touch</h5>
+                <p class="carousel-text">We are here to help. Contact us with any questions or concerns.</p>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <div class="carousel-caption d-none d-md-block">
+            </div>
+        </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#contactCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#contactCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+    </button>
+</div>
+{% endblock banner_slider %}
+
+{% block main-content %}
+<section class="contact-us">
+    <div class="container">
+        <header class="contact-header text-center">
+            <h1>Contact Us</h1>
+            <p>We’re happy to assist with any queries you may have. Feel free to reach out!</p>
+        </header>
+
+        <div class="row">
+            <!-- Contact Form Section -->
+            <div class="col-lg-7">
+                <section class="contact-form">
+                    <h2>Get in Touch</h2>
+                    <form id="contactForm" method="POST" action="#">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">Subject</label>
+                            <input type="text" class="form-control" id="subject" name="subject" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Your Message</label>
+                            <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </form>
+                </section>
+            </div>
+
+            <!-- Google Map Section -->
+            <div class="col-lg-5">
+                <section class="contact-map">
+                    <h2>Our Location</h2>
+                    <div class="map-container">
+                        <iframe src="https://www.google.com/maps/embed?pb=...your-map-embed-code..." width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock main-content %}
+
+<!-- Add Google Fonts link for better typography -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Poppins:wght@600&display=swap" rel="stylesheet">
+
+<style>
+    /* General Body Styling */
+    body {
+        font-family: 'Roboto', sans-serif;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    .contact-us {
+        padding: 60px 0;
+        background-color: #f9f9f9;
+    }
+
+    .contact-header h1 {
+        font-size: 2.8em;
+        color: #2C3E50;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+
+    .contact-header p {
+        font-size: 1.2em;
+        color: #555;
+    }
+
+    .contact-form h2 {
+        font-size: 2.2em;
+        margin-bottom: 20px;
+        color: #34495E;
+        font-weight: 600;
+    }
+
+    .contact-form .form-label {
+        font-size: 1.1em;
+        color: #555;
+    }
+
+    .contact-form .form-control {
+        font-size: 1.1em;
+        padding: 12px;
+        border-radius: 8px;
+    }
+
+    .contact-form button {
+        background-color: #3498db;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        font-size: 1.2em;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .contact-form button:hover {
+        background-color: #2980b9;
+    }
+
+    .contact-map {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .map-container {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    /* Carousel Styling */
+    .carousel-title {
+        font-family: 'Poppins', sans-serif;
+        font-size: 2.5rem;
+        font-weight: 600;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .carousel-text {
+        font-size: 1.2rem;
+        font-weight: 400;
+        text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .carousel-control-prev-icon, .carousel-control-next-icon {
+        background-color: #3498db;
+        border-radius: 50%;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .contact-header h1 {
+            font-size: 2.5em;
+        }
+
+        .contact-form h2 {
+            font-size: 2em;
+        }
+
+        .contact-form .form-control {
+            font-size: 1em;
+        }
+
+        .contact-map iframe {
+            height: 250px;
+        }
+    }
+</style>

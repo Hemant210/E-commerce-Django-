@@ -1,0 +1,85 @@
+{% extends 'app/base.html' %}
+{% load static %}
+
+{% block title %}Buy Now{% endblock title %}
+
+{% block main-content %}
+<div class="container my-5">
+    <div class="row mb-4">
+        <!-- Welcome Section -->
+        <div class="col-12">
+            <h3>Welcome, <span class="text-capitalize">{{ request.user }}</span></h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Sidebar Section -->
+        <div class="col-sm-3 border-end">
+            <ul class="list-unstyled">
+                <li class="d-grid mb-3">
+                    <a href="{% url 'orders' %}" class="btn btn-primary">Orders</a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content Section -->
+        <div class="col-sm-9">
+            {% if order_placed %}
+                {% for op in order_placed %}
+                <div class="card mb-4">
+                    <div class="row g-0">
+                        <!-- Product Image -->
+                        <div class="col-md-2 d-flex align-items-center justify-content-center">
+                            <img src="{{ op.product.product_image.url }}" 
+                                 class="img-fluid rounded" 
+                                 alt="{{ op.product.title }}" 
+                                 style="max-height: 150px;">
+                        </div>
+
+                        <!-- Product Details -->
+                        <div class="col-md-7">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ op.product.title }}</h5>
+                                <p class="card-text">Quantity : {{ op.quantity }}</p>
+                                <p class="card-text">Price : {{ op.total_cost }} INR</p>
+                            </div>
+                        </div>
+
+                        <!-- Order Status -->
+                        <div class="col-md-3 d-flex align-items-center">
+                            <div class="w-100">
+                                <p class="mb-2">Order Status: <strong>{{ op.status }}</strong></p>
+                                <div class="progress" style="height: 10px;">
+                                    {% if op.status == 'Accepted' %}
+                                    <div class="progress-bar bg-info" role="progressbar" style="width: 20%;" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100"></div>
+                                    {% elif op.status == 'Packed' %}
+                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 40%;" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
+                                    {% elif op.status == 'Pending' %}
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: 70%;" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
+                                    {% elif op.status == 'Delivered' %}
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                                    {% elif op.status == 'Cancel' %}
+                                    <div class="progress-bar bg-danger" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+                                    {% elif op.status == 'On The-way' %}
+                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 55%;" aria-valuenow="55" aria-valuemin="0" aria-valuemax="100"></div>
+                                   {% endif %}
+                                </div>
+
+                                <!-- Display the Download Invoice button only if the status is 'Delivered' -->
+                                {% if op.status == 'Delivered' %}
+                                <a href="{% url 'invoice' op.id %}" class="btn btn-secondary mt-2">Download Invoice</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    No orders placed yet.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock main-content %}

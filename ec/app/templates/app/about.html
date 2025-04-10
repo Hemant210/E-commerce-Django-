@@ -1,0 +1,224 @@
+{% extends 'app/base.html' %}
+
+{% load static %}
+
+{% block title %}About Patil Dairy{% endblock %}
+
+{% block main-content %}
+<section class="about-us text-center">
+    <div class="container">
+        <header class="about-header">
+            <h1>About Patil Dairy</h1>
+            <p>Our commitment to delivering the finest dairy products to your doorstep with utmost care and quality.</p>
+        </header>
+
+        <section class="company-history">
+            <h2>Our History</h2>
+            <p>Patil Dairy was established in 1995 with a vision to bring fresh, organic dairy products to homes across the region. Over the years, we've grown from a small local dairy farm to a trusted name in the industry, serving thousands of satisfied customers.</p>
+        </section>
+
+        <section class="mission">
+            <h2>Our Mission</h2>
+            <p>We aim to provide nutritious, fresh, and affordable dairy products while ensuring the highest standards of animal welfare and environmental sustainability.</p>
+        </section>
+
+        <section class="values">
+            <h2>Our Values</h2>
+            <ul>
+                <li><strong>Quality:</strong> We never compromise on the quality of our products.</li>
+                <li><strong>Customer-Centric:</strong> Our customers' satisfaction is our top priority.</li>
+                <li><strong>Integrity:</strong> We are committed to ethical and transparent practices.</li>
+                <li><strong>Sustainability:</strong> We believe in protecting the environment for future generations.</li>
+            </ul>
+        </section>
+
+        <section class="achievements">
+            <h2>Our Achievements</h2>
+            <div class="achievements-grid">
+                <div class="achievement-card">
+                    <div class="achievement-icon">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <h3>Award for Quality</h3>
+                    <p>Recognized for our commitment to producing the highest quality dairy products in the industry.</p>
+                </div>
+                <div class="achievement-card">
+                    <div class="achievement-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Best Customer Satisfaction</h3>
+                    <p>Honored for consistently exceeding customer expectations and building lasting relationships.</p>
+                </div>
+                <div class="achievement-card">
+                    <div class="achievement-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h3>Environmental Excellence</h3>
+                    <p>Awarded for our eco-friendly practices and commitment to sustainable farming and packaging.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="contact-info">
+            <h2>Contact Us</h2>
+            <p>Have questions? Get in touch with us for more information about our products and services.</p>
+            <address>
+                <strong>Patil Dairy</strong><br>
+                123 Dairy Lane, Pune, India<br>
+                <strong>Email:</strong> <a href="mailto:contact@patildairy.com">contact@patildairy.com</a><br>
+                <strong>Phone:</strong> +91-8758834795
+            </address>
+        </section>
+    </div>
+</section>
+{% endblock main-content %}
+
+<!-- Add Google Fonts link for better typography -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Poppins:wght@600&display=swap" rel="stylesheet">
+
+<!-- Font Awesome for Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+<style>
+    /* Base typography */
+    body {
+        font-family: 'Roboto', sans-serif;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    .about-us {
+        background-color: #fafafa;
+        padding: 50px 0;
+        color: #333;
+    }
+
+    .about-header {
+        margin-bottom: 40px;
+    }
+
+    .about-header h1 {
+        font-size: 3em;
+        color: #2C3E50;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .about-header p {
+        font-size: 1.2em;
+        color: #555;
+    }
+
+    section {
+        margin-bottom: 50px;
+    }
+
+    h2 {
+        font-size: 2.5em;
+        color: #34495E;
+        margin-bottom: 20px;
+        font-weight: 600;
+    }
+
+    .company-history p, .mission p, .values ul, .contact-info p {
+        font-size: 1.1em;
+        color: #555;
+    }
+
+    .values ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        line-height: 2;
+    }
+
+    .values li {
+        font-size: 1.2em;
+    }
+
+    address {
+        font-size: 1.1em;
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    /* Link styles */
+    a {
+        color: #3498db;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    /* Achievements Section */
+    .achievements-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+        margin-top: 30px;
+    }
+
+    .achievement-card {
+        background-color: #fff;
+        border: 1px solid #ddd;
+        padding: 30px;
+        border-radius: 10px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .achievement-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .achievement-icon {
+        font-size: 3em;
+        color: #3498db;
+        margin-bottom: 20px;
+    }
+
+    .achievement-card h3 {
+        font-size: 1.6em;
+        color: #2C3E50;
+        margin-bottom: 10px;
+    }
+
+    .achievement-card p {
+        font-size: 1.1em;
+        color: #555;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .about-header h1 {
+            font-size: 2.5em;
+        }
+
+        .about-header p, .company-history p, .mission p, .values ul, .contact-info p {
+            font-size: 1em;
+        }
+
+        h2 {
+            font-size: 2em;
+        }
+
+        .achievements-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .achievements-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

@@ -1,0 +1,45 @@
+{% extends 'app/base.html' %}
+
+{% load static %}
+
+{% block title %}Category{% endblock %}
+{% block main-content %}
+ <div class="container my-5">
+ <div class="row">
+  <div class="col-lg-3 col-md-4 mb-4">
+    <div class="list-group shadow-sm rounded">
+        <h5 class="list-group-item bg-white text-dark fw-bold text-center">
+            Categories
+        </h5>
+        {% for val in title %}
+        <a href="{% url 'category-title' val.title %}" 
+           class="list-group-item list-group-item-action d-flex text-white bg-dark justify-content-between align-items-center">
+            {{ val.title }}
+            <i class="fas fa-chevron-right text-muted text-white bg-dark"></i>
+        </a>
+        {% endfor %}
+    </div>    
+</div>
+    <div class="col-sm-9">
+      <div class = "row">
+        {% for prod in products %}
+        <div class="col text-center mb-4">
+          <a href="{% url 'product-detail' prod.id %}" class="btn">
+            <div>
+              <img src="{{prod.product_image.url}}" width="300px" height="200px" />
+              <div class"fw-bolt">{{prod.title}}</div>
+              <div class="fw-bolt text-danger">
+              Rs.{{prod.discounted_price}}/-
+              <small class="fw-light text-decoration-line-through">{{prod.selling_price}}</small>
+              </div>
+              </div>
+              </a>
+              </div>
+        {% endfor %}
+      </div>
+    </div>        
+ </div>
+</div> 
+{% endblock main-content %}
+
+
