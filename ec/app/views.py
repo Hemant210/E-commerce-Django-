@@ -2,6 +2,7 @@ import json
 from django.http import HttpResponse
 from django.template.loader import get_template
 from xhtml2pdf import pisa
+from django.utils.decorators import method_decorator
 from django.shortcuts import get_object_or_404
 from .models import OrderPlaced
 from django.conf import settings 
@@ -85,48 +86,6 @@ class CategoryView(View):
             "totalitem": totalitem,
             "wishitem": wishitem
         })
-
-# class CategoryView(View):
-#     def get(self, request, val):
-#         from .models import product, Cart, Wishlist
-#         from .models import SUBCATEGORY_CHOICES, MAIN_CATEGORIES, SUBCATEGORY_MAP
-
-#         MAIN_DICT = dict(MAIN_CATEGORIES)
-#         SUB_DICT = dict(SUBCATEGORY_CHOICES)
-
-#         # Try matching subcategory first
-#         products = product.objects.filter(sub_category=val)
-#         category_label = SUB_DICT.get(val)
-
-#         if not products.exists():
-#             # Then try as main_category
-#             products = product.objects.filter(main_category=val)
-#             category_label = MAIN_DICT.get(val)
-
-#         # Fallback label
-#         if not category_label:
-#             category_label = "Category"
-
-#         # Get corresponding subcategories
-#         subcategories = SUBCATEGORY_MAP.get(val, [])
-#         if not subcategories:
-#             # If viewing sub_category, find its main category
-#             for key, sub_list in SUBCATEGORY_MAP.items():
-#                 for code, name in sub_list:
-#                     if code == val:
-#                         subcategories = sub_list
-#                         break
-
-#         totalitem = Cart.objects.filter(user=request.user).count() if request.user.is_authenticated else 0
-#         wishitem = Wishlist.objects.filter(user=request.user).count() if request.user.is_authenticated else 0
-
-#         return render(request, "app/category.html", {
-#             "products": products,
-#             "category_name": category_label,
-#             "subcategories": subcategories,
-#             "totalitem": totalitem,
-#             "wishitem": wishitem
-#         })
 
 class CategoryTitle(View):
     def get(self, request, val):
@@ -230,6 +189,49 @@ def address(request):
        
     addresses = Customer.objects.filter(user=request.user) 
     return render(request, "app/address.html", {'add': addresses}) 
+
+@method_decorator(login_required, name='dispatch')
+class checkout(View):
+    def get(self, request):
+        user = request.user
+        add = Customer.objects.filter(user=user)
+        cart_items = Cart.objects.filter(user=user)
+        totalitem = Cart.objects.filter(user=user).count()
+        wishitem = Wishlist.objects.filter(user=user).count()
+
+        famount = sum(p.quantity * p.products.discounted_price for p in cart_items)
+        totalamount = famount + 40
+        razoramount = int(totalamount * 100)
+
+        # Razorpay order create
+        client = razorpay.Client(auth=(settings.RAZOR_KEY_ID, settings.RAZOR_KEY_SECRET))
+        data = {"amount": razoramount, "currency": "INR", "receipt": "order_rcptid_11"}
+        payment_response = client.order.create(data=data)
+
+        order_id = payment_response['id']
+        order_status = payment_response['status']
+
+        if order_status == 'created':
+            Payment.objects.create(
+                user=user,
+                amount=totalamount,
+                razorpay_order_id=order_id,
+                razorpay_payment_status=order_status
+            )
+
+        return render(request, 'app/checkout.html', {
+            'add': add,
+            'cart_items': cart_items,
+            'totalamount': totalamount,
+            'razoramount': razoramount,
+            'order_id': order_id,
+            'totalitem': totalitem,
+            'wishitem': wishitem
+        })
+
+    def post(self, request):
+        # This method won't do anything since Razorpay handles payment via JS
+        return HttpResponse(status=204)
 
 
 class UpdateAddress(View):
