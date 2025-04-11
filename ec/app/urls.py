@@ -11,9 +11,10 @@ urlpatterns = [
     path('', views.hello),  # Home page
     path('about/', views.about,name="about"),
     path('contact/', views.contact,name="contact"),
-    path('category/<slug:val>', views.CategoryView.as_view(), name="category"),
+    path('category/<slug:val>', views.CategoryView.as_view(), name="main_category"),
     path('category-title/<val>', views.CategoryTitle.as_view(), name="category-title"),
-    path("product-detail/<int:pk>", views.ProductDetail.as_view(), name="product-detail"), 
+    path("product-detail/<int:pk>/", views.ProductDetail.as_view(), name="product-detail"),
+    path('category/<slug:val>/', views.CategoryView.as_view(), name='category'),
     path('registration/', views.CustomerRegistrationView.as_view(), name="customerregistration"),
     path('accounts/login/', auth_view.LoginView.as_view(template_name='app/login.html', 
        authentication_form=LoginForm) , name='login'),
@@ -32,8 +33,8 @@ urlpatterns = [
     path('pluscart/', views.plus_cart, name='plus_cart'),
     path('minuscart/', views.minus_cart, name='minus_cart'),  
     path('removecart/', views.remove_cart, name='removecart'), 
-    path('pluswishlist', views.plus_wishlist, name='pluswishlist'),
-    path('minuswishlist', views.minus_wishlist, name='minus_wishlist'),
+    path('pluswishlist', views.plus_wishlist, name='plus-wishlist'),
+    path('minuswishlist', views.minus_wishlist, name='minus-wishlist'),
 
     path('passwordchangedone/', auth_view.PasswordChangeDoneView.as_view(
     template_name='app/passwordchangedone.html'), name='passwordchangedone'),

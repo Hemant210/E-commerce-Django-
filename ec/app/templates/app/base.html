@@ -20,7 +20,7 @@
   <style>
     body {
       font-family: 'Segoe UI', 'Cambria', 'Calibri', sans-serif;
-      background-color: #f0f8f4; /* soft greenish-white dairy feel */
+      background-color:rgb(180, 180, 202); /* soft greenish-white dairy feel */
       color: #f3f4f6; /* Light gray text */
 
     }
@@ -206,14 +206,14 @@
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown"><i class="fas fa-box-open me-1"></i>Products</a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="{% url 'category' 'ML' %}">Milk</a></li>
-            <li><a class="dropdown-item" href="{% url 'category' 'cr' %}">Curd</a></li>
-            <li><a class="dropdown-item" href="{% url 'category' 'LS' %}">Lassi</a></li>
-            <li><a class="dropdown-item" href="{% url 'category' 'GH' %}">Ghee</a></li>
-            <li><a class="dropdown-item" href="{% url 'category' 'PN' %}">Paneer</a></li>
-            <li><a class="dropdown-item" href="{% url 'category' 'CZ' %}">Cheese</a></li>
-            <li><a class="dropdown-item" href="{% url 'category' 'IC' %}">Ice-cream</a></li>
-          </ul>
+            <li><a class="dropdown-item" href="{% url 'main_category' 'DA' %}">Dairy</a></li>
+            <li><a class="dropdown-item" href="{% url 'main_category' 'EL' %}">Electronics</a></li>
+            <li><a class="dropdown-item" href="{% url 'main_category' 'GR' %}">Groceries</a></li>
+            <li><a class="dropdown-item" href="{% url 'main_category' 'WF' %}">Women's Fashion</a></li>
+            <li><a class="dropdown-item" href="{% url 'main_category' 'MF' %}">Men's Fashion</a></li>
+            <li><a class="dropdown-item" href="{% url 'main_category' 'FT' %}">Footwear</a></li>
+            <li><a class="dropdown-item" href="{% url 'main_category' 'BK' %}">Books</a></li>
+             </ul>
         </li>
         <li class="nav-item"><a class="nav-link" href="{% url 'about' %}"><i class="fas fa-info-circle me-1"></i>About</a></li>
         <li class="nav-item"><a class="nav-link" href="{% url 'contact' %}"><i class="fas fa-envelope me-1"></i>Contact</a></li>

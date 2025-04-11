@@ -1,30 +1,53 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-CATEGORY_CHOICES = (
-    ('cr','Curd'),
-    ('ML','Milk'),
-    ('LS','Lassi'),
-    ('ms','Milkshake'),
-    ('PN','Paneer'),
-    ('GH','Ghee'),
-    ('CZ','Chesse'),
-    ('IC','Ice-cre'),
-    
-)
+MAIN_CATEGORIES = [
+    ('DA', 'Dairy'),
+    ('EL', 'Electronics'),
+    ('GR', 'Groceries'),
+    ('WF', "Women's Fashion"),
+    ('MF', "Men's Fashion"),
+    ('FT', "Footwear"),
+    ('BK', "Books"),
+]
+
+SUBCATEGORY_CHOICES = [
+    ('ML', 'Milk'), ('LS', 'Lassi'), ('GH', 'Ghee'), ('CR', 'Curd'),
+    ('PN', 'Paneer'), ('CZ', 'Cheese'), ('IC', 'Ice-cream'), ('CH', 'Chocolate'), ('MS', 'Milkshake'),
+    ('MB', 'Mobile'), ('TV', 'TV'), ('LP', 'Laptop'),
+    ('FR', 'Fruits'), ('VG', 'Vegetables'), ('GRI', 'Grains'), ('SP', 'Spices'),
+    ('WSR', 'Sarees'), ('WDR', 'Dresses'), ('WJE', 'Jeans'),
+    ('MSH', 'Shirts'), ('MTS', 'T-Shirts'), ('MTR', 'Trousers'),
+    ('MSL', "Men's Slippers"), ('WSN', "Women's Sneakers"),
+    ('FIC', 'Fiction'), ('NFC', 'Non-fiction'), ('EDU', 'Educational'), ('COM', 'Comics'), ('BIO', 'Biographies'),
+]
+
+SUBCATEGORY_MAP = {
+    'DA': [('ML', 'Milk'), ('LS', 'Lassi'), ('GH', 'Ghee'), ('CR', 'Curd'),
+           ('PN', 'Paneer'), ('CZ', 'Cheese'), ('IC', 'Ice-cream'), ('CH', 'Chocolate'), ('MS', 'Milkshake')],
+    'EL': [('MB', 'Mobile'), ('TV', 'TV'), ('LP', 'Laptop')],
+    'GR': [('FR', 'Fruits'), ('VG', 'Vegetables'), ('GRI', 'Grains'), ('SP', 'Spices')],
+    'WF': [('WSR', 'Sarees'), ('WDR', 'Dresses'), ('WJE', 'Jeans')],
+    'MF': [('MSH', 'Shirts'), ('MTS', 'T-Shirts'), ('MTR', 'Trousers')],
+    'FT': [('MSL', "Men's Slippers"), ('WSN', "Women's Sneakers")],
+    'BK': [('FIC', 'Fiction'), ('NFC', 'Non-fiction'), ('EDU', 'Educational'), ('COM', 'Comics'), ('BIO', 'Biographies')],
+}
 
 class product(models.Model):
     title = models.CharField(max_length=100)
     selling_price = models.FloatField()
     discounted_price = models.FloatField()
     description = models.TextField()
-    composition = models.TextField(default='')
-    prodapp = models.TextField(default='')
-    category = models.CharField(choices=CATEGORY_CHOICES, max_length=2)
+    composition = models.TextField(default='', blank=True)
+    prodapp = models.TextField(default='', blank=True)
+    main_category = models.CharField(choices=MAIN_CATEGORIES, max_length=3, default='DA')
+    sub_category = models.CharField(choices=SUBCATEGORY_CHOICES, max_length=4, default='ML')
+    brand = models.CharField(max_length=100, default='', blank=True)
     product_image = models.ImageField(upload_to='product')
+
     def __str__(self):
         return self.title
-    
+
 class Customer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=200)

@@ -1,4 +1,72 @@
 {% extends 'app/base.html' %}
+{% load static %}
+
+{% block title %}Product Details{% endblock %}
+
+{% block main-content %}
+<div class="container py-5">
+  <div class="row g-5 align-items-start">
+    
+    <!-- Product Image -->
+    <div class="col-md-6">
+      <div class="border rounded shadow-sm p-3 bg-white">
+        <img src="{{ products.product_image.url }}" alt="{{ products.title }}" 
+             class="img-fluid rounded w-100" 
+             style="max-height: 450px; object-fit: contain;" />
+      </div>
+    </div>
+
+    <!-- Product Details -->
+    <div class="col-md-6">
+      <h2 class="fw-bold text-dark mb-3">{{ products.title }}</h2>
+
+      <!-- Price -->
+      <div class="mb-3">
+        <span class="fs-3 fw-bold text-success">₹{{ products.discounted_price }}</span>
+        <del class="text-muted ms-2">₹{{ products.selling_price }}</del>
+      </div>
+
+      <!-- Description -->
+      <p class="mb-2 text-muted"><strong>Description:</strong> {{ products.description }}</p>
+
+      {% if products.composition %}
+      <p class="mb-2 text-muted"><strong>Composition:</strong> {{ products.composition }}</p>
+      {% endif %}
+
+      {% if products.prodapp %}
+      <p class="mb-4 text-muted"><strong>Application:</strong> {{ products.prodapp }}</p>
+      {% endif %}
+
+      <!-- Buttons -->
+      <div class="d-flex flex-wrap gap-3">
+        <form action="{% url 'add_to_cart' %}" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="product_id" value="{{ products.id }}">
+          <button type="submit" class="btn btn-danger btn-lg shadow-sm">
+            <i class="fas fa-shopping-cart me-1"></i> Add to Cart
+          </button>
+        </form>
+
+        <a href="#" class="btn btn-warning btn-lg shadow-sm px-4">
+          <i class="fas fa-bolt me-1"></i> Buy Now
+        </a>
+
+        {% if wishlist %}
+          <a pid="{{ products.id }}" class="minus-wishlist btn btn-outline-danger btn-lg shadow-sm">
+            <i class="fas fa-heart"></i>
+          </a>
+        {% else %}
+          <a pid="{{ products.id }}" class="plus-wishlist btn btn-outline-success btn-lg shadow-sm">
+            <i class="far fa-heart"></i>
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock main-content %}
+
+{% comment %} {% extends 'app/base.html' %}
 
 {% load static %}
 
@@ -59,4 +127,4 @@
         </div>
     </div> 
 </div>
-{% endblock main-content %}
+{% endblock main-content %} {% endcomment %}

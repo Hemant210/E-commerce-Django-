@@ -22,8 +22,8 @@ $('.plus-cart').click(function () {
 
 $('.minus-cart').click(function () {
     var prod_id = $(this).attr("pid");
-    console.log(prod_id);  // Debug the product ID
-    var quantitySpan = this.parentNode.children[2]; 
+    var quantitySpan = this.parentNode.children[2];
+    var cartRow = $(this).closest('.cart-item');  // You can adjust selector
 
     $.ajax({
         type: "GET",
@@ -32,7 +32,12 @@ $('.minus-cart').click(function () {
             'prod_id': prod_id
         },
         success: function (data) {
-            $(quantitySpan).text(data.quantity);
+            if (data.quantity === 0) {
+                // Remove the item from UI if quantity becomes 0
+                cartRow.remove();
+            } else {
+                $(quantitySpan).text(data.quantity);
+            }
             $('#amount').text("Rs. " + data.amount);
             $('#totalamount').text("Rs. " + data.totalamount);
         },
@@ -57,9 +62,16 @@ $('.remove-cart').click(function () {
             row.remove();  // Remove the item row from the cart
             $('#amount').text("Rs. " + data.amount);  // Update the cart amount
             $('#totalamount').text("Rs. " + data.totalamount);  // Update total amount
+          
+            if (response.message) {
+                showMessage(response.message, 'success');
+            }
+            $el.fadeOut(500, function () {
+                $(this).remove();
+            });
         },
-        error: function (error) {
-            console.error("Error:", error);
+        error: function () {
+            showMessage('Something went wrong.', 'danger');
         }
     });
 });
@@ -113,3 +125,4 @@ $('.minus-wishlist').click(function () {
         }
     });
 });
+

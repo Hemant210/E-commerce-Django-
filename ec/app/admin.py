@@ -7,7 +7,9 @@ from django.contrib.auth.models import Group
 
 @admin.register(product)
 class ProductModelAdmin(admin.ModelAdmin):
-    list_display = ['id', 'title', 'discounted_price', 'category', 'product_image']
+       list_display = [
+        'id', 'title', 'main_category', 'sub_category', 'discounted_price', 'product_image'
+    ]
     
 
 @admin.register(Customer)

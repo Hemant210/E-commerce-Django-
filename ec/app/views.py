@@ -18,6 +18,8 @@ from django.contrib.auth.forms import PasswordResetForm
 from django.urls import reverse_lazy
 from . forms import CustomerProfileForm, CustomerRegistrationForm
 from django.db.models import Q
+from .models import product, MAIN_CATEGORIES, SUBCATEGORY_CHOICES, SUBCATEGORY_MAP
+
 
 def hello(request):
     totalitem = 0
@@ -41,24 +43,95 @@ def contact(request):
     if request.user.is_authenticated:
         totalitem = len(Cart.objects.filter(user=request.user))
         wishitem = len(Wishlist.objects.filter(user=request.user))
-    return render(request, 'app/contact.html',locals())
+        return render(request, 'app/contact.html',locals())
 
-class CategoryView(View):  
-    def get(self, request, val):  # Accepting 'val' parameter in the URL
-        products = product.objects.filter(category=val)  
-        title = product.objects.filter(category=val).values('title')
-        totalitem = 0
-        wishitem = 0
-        if request.user.is_authenticated:
-           totalitem = len(Cart.objects.filter(user=request.user))
-           wishitem = len(Wishlist.objects.filter(user=request.user))
-    
-        return render(request, "app/category.html", locals())
+class CategoryView(View):
+    def get(self, request, val):
+        from .models import product, Cart, Wishlist
+        from .models import SUBCATEGORY_CHOICES, MAIN_CATEGORIES, SUBCATEGORY_MAP
+
+        MAIN_DICT = dict(MAIN_CATEGORIES)
+        SUB_DICT = dict(SUBCATEGORY_CHOICES)
+
+        # First assume it's a subcategory
+        products = product.objects.filter(sub_category=val)
+        category_label = SUB_DICT.get(val)
+        main_category_code = None
+
+        if not products.exists():
+            # Try as main category instead
+            products = product.objects.filter(main_category=val)
+            category_label = MAIN_DICT.get(val)
+            main_category_code = val
+        else:
+            # If it's subcategory, find its parent main category
+            for key, sub_list in SUBCATEGORY_MAP.items():
+                if any(code == val for code, _ in sub_list):
+                    subcategories = sub_list
+                    main_category_code = key
+                    break
+
+        # Fallback to show relevant subcategories
+        subcategories = SUBCATEGORY_MAP.get(main_category_code, [])
+
+        totalitem = Cart.objects.filter(user=request.user).count() if request.user.is_authenticated else 0
+        wishitem = Wishlist.objects.filter(user=request.user).count() if request.user.is_authenticated else 0
+
+        return render(request, "app/category.html", {
+            "products": products,
+            "category_name": category_label,
+            "subcategories": subcategories,
+            "main_category_code": main_category_code,
+            "totalitem": totalitem,
+            "wishitem": wishitem
+        })
+
+# class CategoryView(View):
+#     def get(self, request, val):
+#         from .models import product, Cart, Wishlist
+#         from .models import SUBCATEGORY_CHOICES, MAIN_CATEGORIES, SUBCATEGORY_MAP
+
+#         MAIN_DICT = dict(MAIN_CATEGORIES)
+#         SUB_DICT = dict(SUBCATEGORY_CHOICES)
+
+#         # Try matching subcategory first
+#         products = product.objects.filter(sub_category=val)
+#         category_label = SUB_DICT.get(val)
+
+#         if not products.exists():
+#             # Then try as main_category
+#             products = product.objects.filter(main_category=val)
+#             category_label = MAIN_DICT.get(val)
+
+#         # Fallback label
+#         if not category_label:
+#             category_label = "Category"
+
+#         # Get corresponding subcategories
+#         subcategories = SUBCATEGORY_MAP.get(val, [])
+#         if not subcategories:
+#             # If viewing sub_category, find its main category
+#             for key, sub_list in SUBCATEGORY_MAP.items():
+#                 for code, name in sub_list:
+#                     if code == val:
+#                         subcategories = sub_list
+#                         break
+
+#         totalitem = Cart.objects.filter(user=request.user).count() if request.user.is_authenticated else 0
+#         wishitem = Wishlist.objects.filter(user=request.user).count() if request.user.is_authenticated else 0
+
+#         return render(request, "app/category.html", {
+#             "products": products,
+#             "category_name": category_label,
+#             "subcategories": subcategories,
+#             "totalitem": totalitem,
+#             "wishitem": wishitem
+#         })
 
 class CategoryTitle(View):
     def get(self, request, val):
         products = product.objects.filter(title=val)
-        title = product.objects.filter(category=products[0].category).values('title')
+        title = product.objects.filter(main_category=products[0].main_category).values('title')
         totalitem = 0
         wishitem = 0
         if request.user.is_authenticated:
@@ -66,18 +139,26 @@ class CategoryTitle(View):
            wishitem = len(Wishlist.objects.filter(user=request.user))
     
         return render(request, "app/category.html", locals())
-
+        
 class ProductDetail(View):
-    def get(self, request, pk): 
+    def get(self, request, pk):
         products = product.objects.get(pk=pk)
-        wishlist = Wishlist.objects.filter(Q(product=products) & Q(user=request.user))
 
-        totalitem = 0
-        wishitem = 0
+        wishlist = None  # or [] if you plan to loop in template
+
+        # ✅ check if user is logged in before querying
         if request.user.is_authenticated:
-           totalitem = len(Cart.objects.filter(user=request.user))
-           wishitem = len(Wishlist.objects.filter(user=request.user))
-        return render(request, "app/productdetails.html", locals())
+            wishlist = Wishlist.objects.filter(Q(product=products) & Q(user=request.user)).exists()
+
+        totalitem = Cart.objects.filter(user=request.user).count() if request.user.is_authenticated else 0
+        wishitem = Wishlist.objects.filter(user=request.user).count() if request.user.is_authenticated else 0
+
+        return render(request, "app/productdetails.html", {
+            'products': products,
+            'wishlist': wishlist,
+            'totalitem': totalitem,
+            'wishitem': wishitem
+        })
 
 class CustomerRegistrationView(View):
     def get(self, request):
@@ -320,138 +401,105 @@ def orders(request):
 @login_required
 def plus_cart(request):
     if request.method == "GET":
-        prod_id = request.GET.get('prod_id')  # Get the product ID from the request
-        cart_item = get_object_or_404(Cart, products__id=prod_id, user=request.user)
+        prod_id = request.GET.get('prod_id')
+
+        # Get cart item for this product and user
+        cart_item = Cart.objects.filter(products__id=prod_id, user=request.user).first()
+        if not cart_item:
+            return JsonResponse({'error': 'Cart item not found'}, status=404)
 
         cart_item.quantity += 1
         cart_item.save()
 
         cart = Cart.objects.filter(user=request.user)
         amount = sum(item.quantity * item.products.discounted_price for item in cart)
-        totalamount = amount + 40  # Adding shipping cost
+        totalamount = amount + 40  # fixed shipping
 
-        data = {
+        return JsonResponse({
             'quantity': cart_item.quantity,
             'amount': amount,
             'totalamount': totalamount
-        }
-        return JsonResponse(data)
-
-    if request.method == "GET":
-        prod_id = request.GET.get('product_id')  # Get the product ID from the request
-        cart_item = get_object_or_404(Cart, products__id=prod_id, user=request.user)  
-        
-        cart_item.quantity += 1
-        cart_item.save()
-
-        cart = Cart.objects.filter(user=request.user)
-        amount = sum(item.quantity * item.products.discounted_price for item in cart)
-        totalamount = amount + 40  # Adding shipping cost
-
-        data = {
-            'quantity': cart_item.quantity,
-            'amount': amount,
-            'totalamount': totalamount
-        }
-        return JsonResponse(data)
+        })
 
 @login_required
 def minus_cart(request):
     if request.method == "GET":
-        prod_id = request.GET.get('prod_id')  # Get the product ID from the request
-        try:
-            c = get_object_or_404(Cart, Q(products__id=prod_id) & Q(user=request.user))
-            
-            if c.quantity > 1:
-                c.quantity -= 1
-                c.save()
-            else:
-                c.delete()  # Remove the item from the cart if quantity reaches 0
+        prod_id = request.GET.get('prod_id')
+        cart_item = Cart.objects.filter(products__id=prod_id, user=request.user).first()
 
-            cart = Cart.objects.filter(user=request.user)
-            amount = sum(item.quantity * item.products.discounted_price for item in cart)
-            totalamount = amount + 40  # Adding shipping cost
+        if not cart_item:
+            return JsonResponse({'error': 'Cart item not found'}, status=404)
 
-            data = {
-                'quantity': c.quantity if c.quantity > 0 else 0,  # If deleted, quantity is 0
-                'amount': amount,
-                'totalamount': totalamount,
-            }
-            return JsonResponse(data)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
+        if cart_item.quantity > 1:
+            cart_item.quantity -= 1
+            cart_item.save()
+        else:
+            cart_item.delete()
+
+        cart = Cart.objects.filter(user=request.user)
+        amount = sum(item.quantity * item.products.discounted_price for item in cart)
+        totalamount = amount + 40
+
+        return JsonResponse({
+            'quantity': cart_item.quantity if cart_item.quantity > 0 else 0,
+            'amount': amount,
+            'totalamount': totalamount
+        })
 
 @login_required
 def remove_cart(request):
     if request.method == "GET":
-        prod_id = request.GET.get('prod_id')  # Get the product ID from the request
-        try:
-            cart_item = get_object_or_404(Cart, Q(products__id=prod_id) & Q(user=request.user))
-            
-            cart_item.delete()
-
-            cart = Cart.objects.filter(user=request.user)
-            amount = sum(item.quantity * item.products.discounted_price for item in cart)
-            totalamount = amount + 40  # Adding shipping cost
-
-            data = {
-                'amount': amount,
-                'totalamount': totalamount,
-            }
-            return JsonResponse(data)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
-
-def plus_wishlist(request):
-    if request.method == "GET":
-        prod_id = request.GET.get('prod_id')  # Get the product ID from the request
-
-        if not prod_id:  # Check if prod_id is empty
-            return HttpResponseBadRequest("Product ID is missing.")
-
-        try:
-            products = get_object_or_404(product, id=prod_id)
-            user = request.user
-            Wishlist(user=user, product=products).save()
-            data = {
-                'message': 'Wishlist added Successfully'
-            }
-            return JsonResponse(data)
-        except ValueError:
-            return HttpResponseBadRequest("Invalid Product ID.")
-
-def minus_wishlist(request):
-    if request.method == "GET":
         prod_id = request.GET.get('prod_id')
+        cart_item = Cart.objects.filter(products__id=prod_id, user=request.user).first()
 
-        if not prod_id:  # Check for empty prod_id
-            return HttpResponseBadRequest("Product ID is missing.")
+        if not cart_item:
+            return JsonResponse({'error': 'Cart item not found'}, status=404)
 
-        try:
-            products = get_object_or_404(product, id=prod_id)
-            products = get_object_or_404(product, id=prod_id)
-            user = request.user
-            Wishlist.objects.filter(user=user, product=products).delete()
-            return JsonResponse(data)
-        except ValueError:
-            return HttpResponseBadRequest("Invalid Product ID.")
+        cart_item.delete()
 
-    if request.method == "GET":
-        prod_id = request.GET.get('prod_id')  # Get the product ID from the request
+        cart = Cart.objects.filter(user=request.user)
+        amount = sum(item.quantity * item.products.discounted_price for item in cart)
+        totalamount = amount + 40
 
-        if not prod_id:  # Check if prod_id is empty
-            return HttpResponseBadRequest("Product ID is missing.")
+        return JsonResponse({
+            'amount': amount,
+            'totalamount': totalamount,
+            'message': 'Item removed from cart successfully'
+        })
 
-        try:
-            products = get_object_or_404(product, id=prod_id)
-            user = request.user
-            Wishlist(user=user, product=products).delete()
-            data = {
-                'message': 'Wishlist Remove Successfully'
-            }
-            return JsonResponse(data)
-        except ValueError:
-            return HttpResponseBadRequest("Invalid Product ID.")
+@login_required
+def plus_wishlist(request):
+    prod_id = request.GET.get('prod_id')
+
+    if not prod_id:
+        return HttpResponseBadRequest("Product ID is missing.")
+
+    try:
+        products = get_object_or_404(product, id=prod_id)
+        user = request.user
+
+        # Prevent duplicate wishlist entries
+        Wishlist.objects.get_or_create(user=user, product=products)
+
+        return JsonResponse({'message': 'Wishlist added successfully'})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+@login_required
+def minus_wishlist(request):
+    prod_id = request.GET.get('prod_id')
+
+    if not prod_id:
+        return HttpResponseBadRequest("Product ID is missing.")
+
+    try:
+        products = get_object_or_404(product, id=prod_id)
+        user = request.user
+        Wishlist.objects.filter(user=user, product=products).delete()
+
+        return JsonResponse({'message': 'Wishlist removed successfully'})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 @login_required
 def generate_invoice(request, order_id):

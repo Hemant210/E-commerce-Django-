@@ -1,45 +1,71 @@
 {% extends 'app/base.html' %}
-
 {% load static %}
 
-{% block title %}Category{% endblock %}
+{% block title %}{{ category_name }} - Products{% endblock %}
+
 {% block main-content %}
- <div class="container my-5">
- <div class="row">
-  <div class="col-lg-3 col-md-4 mb-4">
-    <div class="list-group shadow-sm rounded">
-        <h5 class="list-group-item bg-white text-dark fw-bold text-center">
-            Categories
+<div class="container my-5">
+  <div class="row">
+    
+    <!-- 🔙 Back Button -->
+    <div class="col-12 mb-4 d-flex justify-content-between align-items-center">
+      <h2 class="fw-bold text-dark">{{ category_name }}</h2>
+      <a href="{% url 'category' main_category_code %}" class="btn btn-outline-secondary shadow-sm">
+        ← Back 
+      </a>
+    </div>
+
+    <!-- Sidebar: Subcategories -->
+    <div class="col-lg-3 col-md-4 mb-4">
+      <div class="bg-white shadow-sm rounded-4 p-3">
+        <h5 class="text-center text-dark fw-bold border-bottom pb-2 mb-3">
+          <i class="fas fa-filter me-2 text-primary"></i>Subcategories
         </h5>
-        {% for val in title %}
-        <a href="{% url 'category-title' val.title %}" 
-           class="list-group-item list-group-item-action d-flex text-white bg-dark justify-content-between align-items-center">
-            {{ val.title }}
-            <i class="fas fa-chevron-right text-muted text-white bg-dark"></i>
-        </a>
-        {% endfor %}
-    </div>    
-</div>
-    <div class="col-sm-9">
-      <div class = "row">
-        {% for prod in products %}
-        <div class="col text-center mb-4">
-          <a href="{% url 'product-detail' prod.id %}" class="btn">
-            <div>
-              <img src="{{prod.product_image.url}}" width="300px" height="200px" />
-              <div class"fw-bolt">{{prod.title}}</div>
-              <div class="fw-bolt text-danger">
-              Rs.{{prod.discounted_price}}/-
-              <small class="fw-light text-decoration-line-through">{{prod.selling_price}}</small>
-              </div>
-              </div>
-              </a>
-              </div>
-        {% endfor %}
+    
+        <div class="list-group list-group-flush subcategory-scroll">
+          {% for code, name in subcategories %}
+            <a href="{% url 'category' code %}" 
+               class="list-group-item list-group-item-action rounded-3 mb-2 shadow-sm d-flex align-items-center justify-content-between hover-sub">
+              <span class="fw-semibold text-dark">
+                <i class="fas fa-tag me-2 text-muted"></i>{{ name }}
+              </span>
+              <i class="fas fa-chevron-right text-secondary small"></i>
+            </a>
+          {% endfor %}
+        </div>
       </div>
-    </div>        
- </div>
-</div> 
+    </div>
+    
+    <!-- Product Grid -->
+    <div class="col-lg-9 col-md-8">
+      <div class="row g-4">
+        {% if products %}
+          {% for prod in products %}
+          <div class="col-md-6 col-lg-4">
+            <a href="{% url 'product-detail' prod.id %}" class="text-decoration-none text-dark">
+              <div class="card border-0 shadow-sm h-100">
+                <img src="{{ prod.product_image.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                <div class="card-body text-center">
+                  <h6 class="card-title fw-semibold">{{ prod.title }}</h6>
+                  <p class="text-danger mb-0 fw-bold">
+                    ₹{{ prod.discounted_price }}
+                    <small class="text-muted text-decoration-line-through">₹{{ prod.selling_price }}</small>
+                  </p>
+                  <span class="badge bg-light text-secondary mt-2">{{ prod.brand }}</span>
+                </div>
+              </div>
+            </a>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="col-12 text-center">
+            <p class="text-muted">No products found in this category.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+
 {% endblock main-content %}
-
-
