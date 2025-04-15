@@ -562,23 +562,3 @@ def search(request):
     }
 
     return render(request, 'app/search.html', context)
-
-#     query = request.GET.get('search', '')  # Safely get the search query
-#     totalitem = 0
-#     wishitem = 0
-
-#     if request.user.is_authenticated:
-#         totalitem = Cart.objects.filter(user=request.user).count()
-#         wishitem = Wishlist.objects.filter(user=request.user).count()
-
-#     # Filter products based on the search query
-#     products = product.objects.filter(Q(title__icontains=query)) if query else []
-
-#     context = {
-#         'products': products,
-#         'query': query,
-#         'totalitem': totalitem,
-#         'wishitem': wishitem,
-#     }
-
-#     return render(request, 'app/search.html', context)
