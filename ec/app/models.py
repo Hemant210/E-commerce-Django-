@@ -100,5 +100,3 @@ class OrderPlaced(models.Model):
 class Wishlist(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     product = models.ForeignKey(product, on_delete=models.CASCADE)
-   
-    
