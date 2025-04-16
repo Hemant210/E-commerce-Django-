@@ -21,7 +21,6 @@ from . forms import CustomerProfileForm, CustomerRegistrationForm
 from django.db.models import Q
 from .models import product, MAIN_CATEGORIES, SUBCATEGORY_CHOICES, SUBCATEGORY_MAP
 
-
 def hello(request):
     totalitem = 0
     wishitem = 0
