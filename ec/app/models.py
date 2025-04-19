@@ -44,9 +44,19 @@ class product(models.Model):
     sub_category = models.CharField(choices=SUBCATEGORY_CHOICES, max_length=4, default='ML')
     brand = models.CharField(max_length=100, default='', blank=True)
     product_image = models.ImageField(upload_to='product')
+    stock = models.PositiveIntegerField(default=0) 
 
     def __str__(self):
         return self.title
+    
+    @property
+    def stock_status(self):
+        if self.stock == 0:
+            return 'Out of Stock'
+        elif self.stock < 5:
+            return 'Limited stock available'
+        else:
+            return 'In Stock'
 
 class Customer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -93,6 +103,16 @@ class OrderPlaced(models.Model):
     ordered_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=50,choices=STATUS_CHOICES, default='Pending')
     payment = models.ForeignKey(Payment,on_delete=models.CASCADE,default="")
+
+    def save(self, *args, **kwargs):
+        if not self.pk:  # Only subtract stock when the order is created, not updated
+            if self.product.stock >= self.quantity:
+                self.product.stock -= self.quantity
+                self.product.save()
+            else:
+                raise ValueError(f"Not enough stock for {self.product.title}")
+        super(OrderPlaced, self).save(*args, **kwargs)
+
     @property
     def total_cost(self):
         return self.quantity * self.product.discounted_price
