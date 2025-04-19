@@ -11,7 +11,6 @@ class ProductModelAdmin(admin.ModelAdmin):
         'id', 'title', 'main_category', 'sub_category', 'discounted_price', 'product_image'
     ]
     
-
 @admin.register(Customer)
 class CustomerModelAdmin(admin.ModelAdmin):
     list_display = ['id', 'users', 'locality', 'city', 'zipcode']
