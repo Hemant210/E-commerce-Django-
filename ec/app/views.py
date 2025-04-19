@@ -677,31 +677,6 @@ def sales_dashboard(request):
 
     return render(request, 'app/base.html', {'plot': graphic})
 
-# def generate_recommendations(user_id):
-#     from .models import UserActivity, product, UserRecommendation
-
-#     viewed_products = UserActivity.objects.filter(user_id=user_id).values_list('product', flat=True)
-
-#     recommended_products = product.objects.exclude(id__in=viewed_products).order_by('?')[:6]
-#     user_rec, created = UserRecommendation.objects.get_or_create(user_id=user_id)
-#     user_rec.recommended_products.set(recommended_products)
-#     user_rec.save()
-
-#     return recommended_products
-
-# def get_recently_viewed_products(user_id, limit=3):
-#     # Get latest viewed product IDs, preserving order
-#     recent_views = (
-#         UserActivity.objects.filter(user_id=user_id)
-#         .order_by('-viewed_on')
-#         .values_list('product', flat=True)
-#         .distinct()  # removes duplicate product views
-#     )
-
-#     # Get actual product objects preserving the order
-#     products = product.objects.filter(id__in=recent_views)[:limit]
-#     return products
-
 # @login_required
 # def user_recommendations(request):
 #     recent = get_recently_viewed_products(request.user.id)
