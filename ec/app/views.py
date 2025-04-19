@@ -19,6 +19,18 @@ from django.contrib.auth.forms import PasswordResetForm
 from django.urls import reverse_lazy
 from . forms import CustomerProfileForm, CustomerRegistrationForm
 from django.db.models import Q
+import pandas as pd
+from prophet import Prophet
+from django.shortcuts import render
+from .models import OrderPlaced 
+import plotly.express as px
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+import io
+import base64
+import plotly.graph_objects as go  
 from .models import product, MAIN_CATEGORIES, SUBCATEGORY_CHOICES, SUBCATEGORY_MAP
 
 def hello(request):
@@ -561,3 +573,94 @@ def search(request):
     }
 
     return render(request, 'app/search.html', context)
+
+def get_sales_data():
+    """Fetch delivered orders and prepare hourly sales data."""
+    orders = OrderPlaced.objects.filter(status='Delivered')
+    data = []
+
+    for order in orders:
+        if order.total_cost:
+            data.append({
+                'datetime': order.ordered_date.replace(minute=0, second=0, microsecond=0),
+                'total_price': order.total_cost
+            })
+
+    if not data:
+        return None
+
+    df = pd.DataFrame(data)
+
+    # Group sales by hour
+    df = df.groupby('datetime')['total_price'].sum().reset_index()
+    df = df.dropna(subset=['total_price'])
+
+    return df if not df.empty else None
+
+def forecast_sales(hourly_sales):
+    """Use Prophet to forecast future hourly sales."""
+    if hourly_sales is None or hourly_sales.empty or len(hourly_sales) < 2:
+        return None
+
+    hourly_sales.columns = ['ds', 'y']
+
+    # Remove timezone from datetime
+    hourly_sales['ds'] = pd.to_datetime(hourly_sales['ds']).dt.tz_localize(None)
+
+    model = Prophet()
+    model.fit(hourly_sales)
+
+    # Predict next 48 hours
+    future = model.make_future_dataframe(periods=48, freq='h')
+    forecast = model.predict(future)
+
+    return forecast
+
+
+def create_placeholder_graphic():
+    """Generate an empty plot when data is not available."""
+    plt.figure(figsize=(10, 6))
+    plt.plot([], [], label="No data available", color='red')
+    plt.title('Hourly Sales Forecast')
+    plt.xlabel('Datetime')
+    plt.ylabel('Sales')
+    plt.legend()
+    plt.tight_layout()
+
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+    graphic = base64.b64encode(buffer.getvalue()).decode('utf-8')
+    buffer.close()
+    plt.close()
+    return graphic
+
+def sales_dashboard(request):
+    daily_sales = get_sales_data()
+    if daily_sales is None:
+        return render(request, 'app/sales_dashboard.html', {'message': 'Not enough data to forecast.'})
+
+    forecast = forecast_sales(daily_sales)
+    if forecast is None:
+        return render(request, 'app/sales_dashboard.html', {'message': 'Forecasting failed due to lack of data.'})
+
+    # Plotting logic
+    plt.figure(figsize=(10, 6))
+    plt.plot(forecast['ds'], forecast['yhat'], label='Predicted Sales')
+    plt.fill_between(forecast['ds'], forecast['yhat_lower'], forecast['yhat_upper'], alpha=0.3)
+    plt.title('Sales Forecast')
+    plt.xlabel('Date')
+    plt.ylabel('Sales')
+    plt.legend()
+    plt.tight_layout()
+
+    buffer = io.BytesIO()
+    plt.savefig(buffer, format='png')
+    buffer.seek(0)
+    image_png = buffer.getvalue()
+    buffer.close()
+
+    graphic = base64.b64encode(image_png).decode('utf-8')
+    plt.close()
+
+    return render(request, 'app/sales_dashboard.html', {'plot': graphic})
