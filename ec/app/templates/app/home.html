@@ -1,7 +1,7 @@
 {% extends 'app/base.html' %}
 {% load static %}
 
-{% block title %}Home - Patil Dairy{% endblock title %}
+{% block title %}Home - Patil Mart{% endblock title %}
 
 {% block banner_slider %}
 <!-- 🖼️ Banner Slider -->
@@ -44,17 +44,62 @@
 <!-- 💡 Info Section -->
 <section class="container mt-5">
   <div class="bg-dark text-white p-5 rounded-4 shadow text-center">
-    <h2 class="fw-bold">Why Choose Patil Mart ?</h2>
+    <h2 class="fw-bold">Why Choose Patil Mart?</h2>
     <p class="fs-5 mt-3">
-      Patil Mart brings you fresh, organic Mart products straight from our farms. Enjoy pure milk, rich ghee, healthy curd, and delicious paneer — all crafted with care for your wellness.
+      Patil Mart delivers fresh, organic dairy and grocery products directly from local farms. Experience purity and quality with every product you order.
     </p>
   </div>
 </section>
 {% endblock information %}
 
 {% block main-content %}
-<!-- 🛒 Featured Products -->
+<!-- ⭐ Recommended Products -->
+<section class="container my-5">
+  <h2 class="text-center mb-4 fw-bold">Recommended For You</h2>
+    {% if recent_views %}
 <section class="container mt-5">
+  <h4 class="text-center mb-4">Recently Viewed</h4>
+  <div class="row">
+    {% for product in recent_views %}
+    <div class="col-md-4 mb-3">
+      <div class="card h-100 text-center shadow-sm">
+        <img src="{{ product.product_image.url }}" class="card-img-top" alt="{{ product.title }}" style="height: 180px; object-fit: cover;">
+        <div class="card-body">
+          <h6>{{ product.title }}</h6>
+          <p class="fw-bold text-danger mb-1">₹{{ product.discounted_price }}</p>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if recommendations %}
+  <section class="container my-5">
+    <div class="row">
+      {% for product in recommendations|slice:":6" %}
+        <div class="col-md-4 mb-3">
+          <!-- Wrap the product card inside an anchor tag -->
+          <a href="{% url 'product-detail' product.id %}" class="text-decoration-none">
+            <div class="card h-100 text-center shadow-sm">
+              <img src="{{ product.product_image.url }}" class="card-img-top" alt="{{ product.title }}" style="height: 200px; object-fit: cover;">
+              <div class="card-body">
+                <h6>{{ product.title }}</h6>
+                <p class="fw-bold text-danger mb-1">₹{{ product.discounted_price }}</p>
+              </div>
+            </div>
+          </a>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+  </section>
+
+
+<!-- 🛒 Featured Products -->
+<section class="container my-5">
   <h3 class="text-center fw-bold mb-5">Our Premium Range</h3>
   <div class="row g-4">
 
@@ -126,5 +171,4 @@
 
   </div>
 </section>
-
 {% endblock main-content %}

@@ -10,7 +10,7 @@ from .forms import LoginForm, MyPasswordResetForm, MyPasswordChangeForm, MySetPa
 
 urlpatterns = [
     path('', views.hello),  # Home page
-    path('about/', views.about,name="about"),
+    path('about/', views.about,name="about"),   
     path('contact/', views.contact,name="contact"),
     path('category/<slug:val>', views.CategoryView.as_view(), name="main_category"),
     path('category-title/<val>', views.CategoryTitle.as_view(), name="category-title"),

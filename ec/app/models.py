@@ -120,3 +120,12 @@ class OrderPlaced(models.Model):
 class Wishlist(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     product = models.ForeignKey(product, on_delete=models.CASCADE)
+
+class UserActivity(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(product, on_delete=models.CASCADE)
+    viewed_on = models.DateTimeField(auto_now_add=True)
+
+class UserRecommendation(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    recommended_products = models.ManyToManyField(product)

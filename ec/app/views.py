@@ -30,16 +30,28 @@ import matplotlib.pyplot as plt
 import matplotlib.pyplot as plt
 import io
 import base64
-import plotly.graph_objects as go  
+import plotly.graph_objects as go
+from .models import UserActivity, UserRecommendation  
 from .models import product, MAIN_CATEGORIES, SUBCATEGORY_CHOICES, SUBCATEGORY_MAP
 
 def hello(request):
     totalitem = 0
     wishitem = 0
+    recommendations = []
+    recent_views = []
+
     if request.user.is_authenticated:
-        totalitem = len(Cart.objects.filter(user=request.user))
-        wishitem = len(Wishlist.objects.filter(user=request.user))
-    return render(request, 'app/home.html',locals())
+        totalitem = Cart.objects.filter(user=request.user).count()
+        wishitem = Wishlist.objects.filter(user=request.user).count()
+        recommendations = generate_recommendations(request.user.id)
+        recent_views = get_recently_viewed_products(request.user.id)
+
+    return render(request, 'app/home.html', {
+        'totalitem': totalitem,
+        'wishitem': wishitem,
+        'recommendations': recommendations,
+        'recent_views': recent_views
+    })
 
 def about(request):
     totalitem = 0
@@ -663,4 +675,64 @@ def sales_dashboard(request):
     graphic = base64.b64encode(image_png).decode('utf-8')
     plt.close()
 
-    return render(request, 'app/sales_dashboard.html', {'plot': graphic})
+    return render(request, 'app/base.html', {'plot': graphic})
+
+# def generate_recommendations(user_id):
+#     from .models import UserActivity, product, UserRecommendation
+
+#     viewed_products = UserActivity.objects.filter(user_id=user_id).values_list('product', flat=True)
+
+#     recommended_products = product.objects.exclude(id__in=viewed_products).order_by('?')[:6]
+#     user_rec, created = UserRecommendation.objects.get_or_create(user_id=user_id)
+#     user_rec.recommended_products.set(recommended_products)
+#     user_rec.save()
+
+#     return recommended_products
+
+# def get_recently_viewed_products(user_id, limit=3):
+#     # Get latest viewed product IDs, preserving order
+#     recent_views = (
+#         UserActivity.objects.filter(user_id=user_id)
+#         .order_by('-viewed_on')
+#         .values_list('product', flat=True)
+#         .distinct()  # removes duplicate product views
+#     )
+
+#     # Get actual product objects preserving the order
+#     products = product.objects.filter(id__in=recent_views)[:limit]
+#     return products
+
+# @login_required
+# def user_recommendations(request):
+#     recent = get_recently_viewed_products(request.user.id)
+#     generated = generate_recommendations(request.user.id)
+
+#     # Combine both and remove duplicates, keeping recent first
+#     seen = set()
+#     recommendations = []
+#     for prod in list(recent) + list(generated):
+#         if prod.id not in seen:
+#             seen.add(prod.id)
+#             recommendations.append(prod)
+
+#     return render(request, 'app/home.html', {
+#         'recommendations': recommendations
+#     })
+
+def get_recently_viewed_products(user_id, limit=3):
+    recent_views = (
+        UserActivity.objects.filter(user_id=user_id)
+        .order_by('-viewed_on')
+        .values_list('product', flat=True)
+        .distinct()
+    )
+    return product.objects.filter(id__in=recent_views)[:limit]
+
+def generate_recommendations(user_id, limit=6):
+    viewed_products = UserActivity.objects.filter(user_id=user_id).values_list('product', flat=True)
+    recommendations = product.objects.exclude(id__in=viewed_products).order_by('?')[:limit]
+    
+    rec_obj, created = UserRecommendation.objects.get_or_create(user_id=user_id)
+    rec_obj.recommended_products.set(recommendations)
+    rec_obj.save()
+    return recommendations
