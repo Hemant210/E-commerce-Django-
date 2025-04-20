@@ -29,8 +29,11 @@ urlpatterns = [
     path('orders/', views.orders, name='orders'),
     path('search/', views.search, name='search'),
     path('invoice/<int:order_id>/', views.generate_invoice, name='invoice'),
-    path('sales-dashboard/', views.sales_dashboard, name='sales-dashboard'),
-    
+    path('sales-dashboard/', views.daily_sales_dashboard, name='sales-dashboard'),
+    path('sales-dashboard/download/', views.download_forecast_csv, name='download_forecast_csv'),
+    path('sales-dashboard/api/', views.forecast_json_api, name='forecast_json_api'),
+    # path('admin/trigger-stock-alert/', views.trigger_stock_alert, name='trigger_stock_alert'),
+
     path('pluscart/', views.plus_cart, name='plus_cart'),
     path('minuscart/', views.minus_cart, name='minus_cart'),  
     path('removecart/', views.remove_cart, name='removecart'), 

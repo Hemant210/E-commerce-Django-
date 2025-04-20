@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import product, Customer, Cart, Payment, OrderPlaced, Wishlist
 from django.utils.html import format_html
 from django.urls import reverse
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import Group
 # Register your models here.
 
@@ -76,4 +77,10 @@ class WishlistModelAdmin(admin.ModelAdmin):
           link = reverse("admin:app_product_change", args=[obj.product.pk])
           return format_html('<a href="{}">{}</a>', link, obj.product.title)
 
+
+@staff_member_required
+def trigger_stock_alert(request):
+    result = run_stock_forecast_alert()
+    return HttpResponse(f"<pre>{result}</pre>")
+    
 admin.site.unregister(Group)

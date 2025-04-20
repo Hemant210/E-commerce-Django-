@@ -2,105 +2,104 @@
 {% load static %}
 {% load tz %}
 
-{% block title %}Sales Dashboard{% endblock %}
+{% block title %}📈 Sales Forecast Dashboard | Patil Dairy{% endblock %}
 
 {% block main-content %}
+<script>
+    document.getElementById('refreshForecast').addEventListener('click', function () {
+      fetch("{% url 'forecast_json_api' %}")
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === "ok") {
+            alert("✅ Forecast data refreshed!");
+            location.reload();  // Or dynamically update plots with Chart.js
+          } else {
+            alert("⚠️ " + data.message);
+          }
+        });
+    });
+    </script>
+    
 <style>
-    body {
-        font-family: 'Roboto', sans-serif;
-        background-color: #f4f6f8;
-        color: #333;
-    }
+  .dashboard-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06);
+  }
 
-    .dashboard-wrapper {
-        max-width: 1000px;
-        margin: 40px auto;
-        background: white;
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
-    }
+  .dashboard-title {
+    text-align: center;
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: #2c3e50;
+  }
 
-    .dashboard-header {
-        text-align: center;
-        margin-bottom: 30px;
-    }
+  .section-header {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #34495e;
+    margin-bottom: 10px;
+  }
 
-    .dashboard-header h2 {
-        color: #2f3e46;
-        font-weight: bold;
-    }
+  .plot-wrapper {
+    margin-bottom: 40px;
+    text-align: center;
+  }
 
-    .granularity-select {
-        margin: 0 auto 30px;
-        text-align: center;
-    }
+  .plot-wrapper img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+  }
 
-    .granularity-select select {
-        padding: 6px 10px;
-        font-size: 15px;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-    }
+  .alert {
+    font-weight: 500;
+    text-align: center;
+  }
 
-    .message {
-        text-align: center;
-        color: #d9534f;
-        font-weight: 500;
-        margin-bottom: 20px;
-    }
-
-    .forecast-img {
-        display: block;
-        max-width: 100%;
-        height: auto;
-        margin: 0 auto;
-        border-radius: 8px;
-        border: 1px solid #ddd;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
-    }
-
-    .footer {
-        text-align: center;
-        font-size: 14px;
-        color: #777;
-        margin-top: 60px;
-    }
+  .footer {
+    text-align: center;
+    font-size: 14px;
+    color: #888;
+    margin-top: 40px;
+    padding: 20px 0;
+  }
 </style>
 
-<div class="dashboard-wrapper">
-    <!-- Header -->
-    <div class="dashboard-header">
-        <h2>Sales Forecast Dashboard</h2>
-    </div>
+<div class="container my-5">
+  <div class="dashboard-container">
+    <h2 class="dashboard-title">📊 Sales Forecast Dashboard</h2>
 
-    <!-- Dropdown -->
-    <div class="granularity-select">
-        <form method="get" action="{% url 'sales-dashboard' %}">
-            <label for="granularity"><strong>View By:</strong></label>
-            <select name="granularity" id="granularity" onchange="this.form.submit()">
-                <option value="hour" {% if request.GET.granularity == 'hour' %}selected{% endif %}>Hourly</option>
-                <option value="day" {% if request.GET.granularity == 'day' or not request.GET.granularity %}selected{% endif %}>Daily</option>
-                <option value="month" {% if request.GET.granularity == 'month' %}selected{% endif %}>Monthly</option>
-            </select>
-        </form>
-    </div>
-
-    <!-- Message -->
+    <div class="text-center my-4">
+        <a href="{% url 'download_forecast_csv' %}" class="btn btn-success me-3">
+          📥 Download Forecast CSV
+        </a>
+        <button class="btn btn-outline-info" id="refreshForecast">🔁 Refresh Forecast</button>
+      </div>
+      
     {% if message %}
-        <div class="message">{{ message }}</div>
-    {% endif %}
-
-    <!-- Forecast Graph -->
-    {% if plot %}
-        <img src="data:image/png;base64,{{ plot }}" class="forecast-img" alt="Sales Forecast Graph">
+      <div class="alert alert-warning">{{ message }}</div>
     {% else %}
-        <p style="text-align:center;">No graph available.</p>
+      <div class="plot-wrapper">
+        <div class="section-header">🔮 Forecasted Daily Sales</div>
+        <img src="data:image/png;base64,{{ plot_forecast }}" alt="Forecasted Sales">
+      </div>
+
+      <div class="plot-wrapper">
+        <div class="section-header">📉 Confidence Interval (Next 14 Days)</div>
+        <img src="data:image/png;base64,{{ plot_confidence }}" alt="Confidence Interval Plot">
+      </div>
+
+      <div class="plot-wrapper">
+        <div class="section-header">📈 Actual vs Predicted Sales (Last 7 Days)</div>
+        <img src="data:image/png;base64,{{ plot_comparison }}" alt="Actual vs Predicted Sales">
+      </div>
     {% endif %}
+  </div>
 </div>
 
-<!-- Footer -->
-<div class="footer">
-    &copy; {% now "Y" %} Patil Dairy | All Rights Reserved
-</div>
 {% endblock %}

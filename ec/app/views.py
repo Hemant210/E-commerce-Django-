@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
+from django.core.mail import send_mail
 from django.contrib.auth.views import LogoutView
 import razorpay
 from .models import Cart, Customer, OrderPlaced, Payment, Wishlist, product  
@@ -586,15 +587,16 @@ def search(request):
 
     return render(request, 'app/search.html', context)
 
-def get_sales_data():
-    """Fetch delivered orders and prepare hourly sales data."""
+
+# 1. Collect Daily Sales Data
+def get_daily_sales_data():
     orders = OrderPlaced.objects.filter(status='Delivered')
     data = []
 
     for order in orders:
         if order.total_cost:
             data.append({
-                'datetime': order.ordered_date.replace(minute=0, second=0, microsecond=0),
+                'date': order.ordered_date.date(),
                 'total_price': order.total_cost
             })
 
@@ -602,80 +604,119 @@ def get_sales_data():
         return None
 
     df = pd.DataFrame(data)
-
-    # Group sales by hour
-    df = df.groupby('datetime')['total_price'].sum().reset_index()
-    df = df.dropna(subset=['total_price'])
+    df = df.groupby('date')['total_price'].sum().reset_index()
+    df.columns = ['ds', 'y']
+    df['ds'] = pd.to_datetime(df['ds'])
+    df = df.dropna(subset=['y'])
 
     return df if not df.empty else None
 
-def forecast_sales(hourly_sales):
-    """Use Prophet to forecast future hourly sales."""
-    if hourly_sales is None or hourly_sales.empty or len(hourly_sales) < 2:
+# 2. Forecast Function Using Prophet
+def forecast_daily_sales(sales_df):
+    if sales_df is None or sales_df.empty or len(sales_df) < 2:
         return None
 
-    hourly_sales.columns = ['ds', 'y']
-
-    # Remove timezone from datetime
-    hourly_sales['ds'] = pd.to_datetime(hourly_sales['ds']).dt.tz_localize(None)
-
     model = Prophet()
-    model.fit(hourly_sales)
+    model.fit(sales_df)
 
-    # Predict next 48 hours
-    future = model.make_future_dataframe(periods=48, freq='h')
+    future = model.make_future_dataframe(periods=14)
     forecast = model.predict(future)
 
     return forecast
 
-
-def create_placeholder_graphic():
-    """Generate an empty plot when data is not available."""
-    plt.figure(figsize=(10, 6))
-    plt.plot([], [], label="No data available", color='red')
-    plt.title('Hourly Sales Forecast')
-    plt.xlabel('Datetime')
-    plt.ylabel('Sales')
-    plt.legend()
-    plt.tight_layout()
-
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)
-    graphic = base64.b64encode(buffer.getvalue()).decode('utf-8')
-    buffer.close()
-    plt.close()
-    return graphic
-
-def sales_dashboard(request):
-    daily_sales = get_sales_data()
-    if daily_sales is None:
-        return render(request, 'app/sales_dashboard.html', {'message': 'Not enough data to forecast.'})
-
-    forecast = forecast_sales(daily_sales)
-    if forecast is None:
-        return render(request, 'app/sales_dashboard.html', {'message': 'Forecasting failed due to lack of data.'})
-
-    # Plotting logic
-    plt.figure(figsize=(10, 6))
-    plt.plot(forecast['ds'], forecast['yhat'], label='Predicted Sales')
-    plt.fill_between(forecast['ds'], forecast['yhat_lower'], forecast['yhat_upper'], alpha=0.3)
-    plt.title('Sales Forecast')
-    plt.xlabel('Date')
-    plt.ylabel('Sales')
-    plt.legend()
-    plt.tight_layout()
-
+# 3. Plot Conversion Helper
+def convert_plot_to_base64():
     buffer = io.BytesIO()
     plt.savefig(buffer, format='png')
     buffer.seek(0)
     image_png = buffer.getvalue()
-    buffer.close()
-
     graphic = base64.b64encode(image_png).decode('utf-8')
+    buffer.close()
     plt.close()
+    return graphic
 
-    return render(request, 'app/base.html', {'plot': graphic})
+# 4. Generate Forecast Plots
+def create_plot(forecast, actual_df):
+    plots = {}
+
+    # Forecast Plot
+    plt.figure(figsize=(10, 5))
+    plt.plot(forecast['ds'], forecast['yhat'], label='Predicted Sales', color='blue')
+    plt.title("🔮 Forecasted Daily Sales")
+    plt.xlabel('Date')
+    plt.ylabel('Sales (₹)')
+    plt.legend()
+    plt.tight_layout()
+    plots['forecast'] = convert_plot_to_base64()
+
+    # Confidence Interval Plot
+    plt.figure(figsize=(10, 5))
+    plt.plot(forecast['ds'], forecast['yhat'], label='Prediction', color='blue')
+    plt.fill_between(forecast['ds'], forecast['yhat_lower'], forecast['yhat_upper'], alpha=0.3, color='skyblue')
+    plt.title("📉 Sales Confidence Interval (Next 14 Days)")
+    plt.xlabel('Date')
+    plt.ylabel('Sales Range (₹)')
+    plt.legend()
+    plt.tight_layout()
+    plots['confidence'] = convert_plot_to_base64()
+
+    # Actual vs Predicted Plot
+    merged = pd.merge(actual_df, forecast, on='ds', how='inner')
+    merged = merged.tail(7)
+
+    plt.figure(figsize=(10, 5))
+    plt.bar(merged['ds'], merged['y'], label='Actual', color='green', alpha=0.6)
+    plt.plot(merged['ds'], merged['yhat'], label='Predicted', color='red', marker='o')
+    plt.title("📊 Actual vs Predicted Sales (Last 7 Days)")
+    plt.xlabel('Date')
+    plt.ylabel('Sales (₹)')
+    plt.legend()
+    plt.tight_layout()
+    plots['comparison'] = convert_plot_to_base64()
+
+    return plots
+
+# 5. Main Dashboard View
+def daily_sales_dashboard(request):
+    actual_sales_df = get_daily_sales_data()
+    if actual_sales_df is None:
+        return render(request, 'app/sales_dashboard.html', {'message': 'Not enough data to forecast.'})
+
+    forecast = forecast_daily_sales(actual_sales_df)
+    if forecast is None:
+        return render(request, 'app/sales_dashboard.html', {'message': 'Forecasting failed due to insufficient data.'})
+
+    plots = create_plot(forecast, actual_sales_df)
+
+    return render(request, 'app/sales_dashboard.html', {
+        'plot_forecast': plots['forecast'],
+        'plot_confidence': plots['confidence'],
+        'plot_comparison': plots['comparison'],
+    })
+
+# 6. CSV Download View
+def download_forecast_csv(request):
+    actual_sales_df = get_daily_sales_data()
+    forecast = forecast_daily_sales(actual_sales_df)
+
+    if forecast is None:
+        return HttpResponse("No forecast data available.", content_type="text/plain")
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="sales_forecast.csv"'
+    forecast.to_csv(path_or_buf=response, index=False)
+    return response
+
+# 7. AJAX JSON Endpoint for Chart.js or Live Polling
+def forecast_json_api(request):
+    actual_sales_df = get_daily_sales_data()
+    forecast = forecast_daily_sales(actual_sales_df)
+
+    if forecast is None:
+        return JsonResponse({'status': 'error', 'message': 'Not enough data.'})
+
+    forecast_data = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(14).to_dict('records')
+    return JsonResponse({'status': 'ok', 'data': forecast_data})
 
 # @login_required
 # def user_recommendations(request):
@@ -711,3 +752,53 @@ def generate_recommendations(user_id, limit=6):
     rec_obj.recommended_products.set(recommendations)
     rec_obj.save()
     return recommendations
+
+def run_stock_forecast_alert():
+    data = OrderPlaced.objects.values('product_id', 'ordered_date', 'quantity')
+    
+    if not data:
+        return "No historical data to forecast."
+
+    df = pd.DataFrame(data)
+    df['ordered_date'] = pd.to_datetime(df['ordered_date'])
+
+    df = df.groupby(['product_id', 'ordered_date']).agg({'quantity': 'sum'}).reset_index()
+    forecasts = {}
+    alerts = []
+
+    for pid in df['product_id'].unique():
+        sub_df = df[df['product_id'] == pid][['ordered_date', 'quantity']].rename(columns={'ordered_date': 'ds', 'quantity': 'y'})
+
+        if len(sub_df) < 2:
+            continue  # Skip if not enough data to forecast
+
+        model = Prophet()
+        model.fit(sub_df)
+
+        future = model.make_future_dataframe(periods=7)
+        forecast = model.predict(future)
+        forecasts[pid] = forecast
+
+        predicted_demand = forecast['yhat'][-7:].sum()
+
+        try:
+            prod = product.objects.get(id=pid)
+            if prod.stock < predicted_demand:
+                alerts.append(f"[ML Alert] '{prod.title}' might go out of stock soon.\nStock: {prod.stock} | Predicted Demand: {int(predicted_demand)}")
+        except product.DoesNotExist:
+            continue
+
+    if alerts:
+        message = "\n\n".join(alerts)
+
+        superusers = User.objects.filter(is_superuser=True)
+        for admin in superusers:
+            send_mail(
+                subject='🧠 ML Stock Alert - Patil Mart',
+                message=message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[admin.email],
+                fail_silently=True,
+            )
+        return f"Sent alerts to {superusers.count()} admin(s)."
+    return "All stocks are fine."
