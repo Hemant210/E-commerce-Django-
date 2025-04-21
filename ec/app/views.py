@@ -587,7 +587,6 @@ def search(request):
 
     return render(request, 'app/search.html', context)
 
-
 # 1. Collect Daily Sales Data
 def get_daily_sales_data():
     orders = OrderPlaced.objects.filter(status='Delivered')
@@ -718,23 +717,7 @@ def forecast_json_api(request):
     forecast_data = forecast[['ds', 'yhat', 'yhat_lower', 'yhat_upper']].tail(14).to_dict('records')
     return JsonResponse({'status': 'ok', 'data': forecast_data})
 
-# @login_required
-# def user_recommendations(request):
-#     recent = get_recently_viewed_products(request.user.id)
-#     generated = generate_recommendations(request.user.id)
-
-#     # Combine both and remove duplicates, keeping recent first
-#     seen = set()
-#     recommendations = []
-#     for prod in list(recent) + list(generated):
-#         if prod.id not in seen:
-#             seen.add(prod.id)
-#             recommendations.append(prod)
-
-#     return render(request, 'app/home.html', {
-#         'recommendations': recommendations
-#     })
-
+#Viewd product data
 def get_recently_viewed_products(user_id, limit=3):
     recent_views = (
         UserActivity.objects.filter(user_id=user_id)
