@@ -415,6 +415,7 @@ def payment_done(request):
     except Exception as e:
         return HttpResponseBadRequest(f"An error occurred: {str(e)}")
 
+@login_required
 def orders(request):
     totalitem = 0
     wishitem = 0
@@ -736,7 +737,7 @@ def generate_recommendations(user_id, limit=6):
     rec_obj.save()
     return recommendations
 
-def run_stock_forecast_alert():
+# def run_stock_forecast_alert():
     data = OrderPlaced.objects.values('product_id', 'ordered_date', 'quantity')
     
     if not data:
