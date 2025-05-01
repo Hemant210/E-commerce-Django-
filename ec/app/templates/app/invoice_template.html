@@ -159,7 +159,9 @@
                     <span class="text-danger">Delivered</span>
                 {% endif %}
             </p>
-            <p class="total">Grand Total: {{ amount|default:"N/A" }}</p>
+             <div class="total-line"><strong>Shipping Fee:</strong> 40</div>
+          </div>
+            <p class="total">Grand Total: {{ amount|add:"40" }}</p>
         </div>
     </div>
 
