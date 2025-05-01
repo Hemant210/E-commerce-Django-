@@ -54,15 +54,19 @@
         <form action="{% url 'add_to_cart' %}" method="post">
           {% csrf_token %}
           <input type="hidden" name="product_id" value="{{ products.id }}">
-          <button type="submit" class="btn btn-danger btn-lg shadow-sm">
+          <button type="submit" name="action" value="add" class="btn btn-danger btn-lg shadow-sm">
             <i class="fas fa-shopping-cart me-1"></i> Add to Cart
-          </button>
+          </button>        
         </form>
 
-        <a href="#" class="btn btn-warning btn-lg shadow-sm px-4">
-          <i class="fas fa-bolt me-1"></i> Buy Now
-        </a>
-
+        <form action="{% url 'add_to_cart' %}" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="product_id" value="{{ products.id }}">
+          <button type="submit" name="action" value="buy" class="btn btn-warning btn-lg shadow-sm px-4">
+            <i class="fas fa-bolt me-1"></i> Buy Now
+          </button>
+        </form>
+        
         {% if wishlist %}
           <a pid="{{ products.id }}" class="minus-wishlist btn btn-outline-danger btn-lg shadow-sm">
             <i class="fas fa-heart"></i>
