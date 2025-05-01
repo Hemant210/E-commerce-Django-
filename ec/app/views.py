@@ -296,27 +296,37 @@ class CustomLogoutView(LogoutView):
     next_page = reverse_lazy('login')
 
 def add_to_cart(request):
-    totalitem = 0
-    wishitem = 0
     if request.user.is_authenticated:
-           totalitem = len(Cart.objects.filter(user=request.user))
-           wishitem = len(Wishlist.objects.filter(user=request.user))
+        totalitem = Cart.objects.filter(user=request.user).count()
+        wishitem = Wishlist.objects.filter(user=request.user).count()
+
     if request.method == 'POST':
         user = request.user
         product_id = request.POST.get('product_id')
+        action = request.POST.get('action')  # 'add' or 'buy'
 
         if product_id:
             try:
                 product_instance = get_object_or_404(product, id=product_id)
-                Cart.objects.create(user=user, products=product_instance)
-                messages.success(request, "Product added to cart successfully!")
-                return redirect('showcart')
+
+                cart_item, created = Cart.objects.get_or_create(user=user, products=product_instance)
+                if not created:
+                    cart_item.quantity += 1
+                    cart_item.save()
+
+                if action == 'buy':
+                    messages.success(request, "Product added to cart successfully!")
+                    return redirect('showcart')  # Go to cart for checkout
+                else:
+                    return redirect('product-detail', pk=product_id)
+
             except Exception as e:
                 messages.error(request, f"An error occurred: {e}")
-                return redirect('/')
-        else:
-            messages.error(request, "Invalid or missing product ID.")
-            return redirect('/')
+                return redirect('product-detail', pk=product_id)
+
+        messages.error(request, "Invalid or missing product ID.")
+        return redirect(request.META.get("HTTP_REFERER", "/"))
+
     return redirect('/')
 
 @login_required
@@ -611,7 +621,7 @@ def get_daily_sales_data():
 
     return df if not df.empty else None
 
-# 2. Forecast Function Using Prophet
+# 2. Forecast Function 
 def forecast_daily_sales(sales_df):
     if sales_df is None or sales_df.empty or len(sales_df) < 2:
         return None
