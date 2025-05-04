@@ -1,175 +1,175 @@
 <!DOCTYPE html>
-{% load static %}
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Invoice - {{ razorpay_order_id }}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 20px;
-        }
-        .invoice-container {
-            max-width: 600px; /* Increased max-width for better fit */
-            margin: auto;
-            background: #fff;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-        }
-        .header, .footer, .details, .items {
-            margin-bottom: 15px; /* Further reduced margin */
-        }
+        {% load static %}
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Invoice - {{ razorpay_order_id }}</title>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+            <style>
+                body {
+                    font-family: 'Arial', sans-serif;
+                    background-color: #f8f9fa;
+                    margin: 0;
+                    padding: 20px;
+                }
+                .invoice-container {
+                    max-width: 600px; /* Increased max-width for better fit */
+                    margin: auto;
+                    background: #fff;
+                    padding: 15px;
+                    border-radius: 10px;
+                    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+                }
+                .header, .footer, .details, .items {
+                    margin-bottom: 15px; /* Further reduced margin */
+                }
 
-        .header h2 {
-            font-size: 28px; /* Reduced font size */
-            color: #333;
-            margin-bottom: 8px; /* Reduced bottom margin */
-        }
-        .header p, .footer p {
-            color: #666;
-            margin: 2px 0; /* Reduced space between text */
-        }
-        .details h4, .items h4 {
-            font-size: 20px; /* Reduced heading size */
-            color: #333;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 5px;
-            margin-bottom: 10px;
-        }
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        .table th, .table td {
-            padding: 8px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-            font-size: 14px; /* Reduced table font size */
-        }
-        .table th {
-            background-color: #f8f9fa;
-            color: #333;
-            font-weight: 600;
-        }
-        .table tbody tr:hover {
-            background-color: #f9f9f9;
-        }
-        .total {
-            font-size: 16px; /* Reduced font size */
-            font-weight: bold;
-            text-align: right;
-            color: #333;
-        }
-        .footer {
-            text-align: center;
-            border-top: 1px solid #eee;
-            color: #666;
-            padding-top: 10px;
-        }
-        .order-summary {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 8px;
-            margin-top: 10px;
-            background-color: #f9f9f9;
-        }
-        .order-summary h5, .order-summary p {
-            font-size: 14px; /* Reduced font size */
-            color: #333;
-            margin: 3px 0; /* Reduced margin */
-        }
-        .invoice-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .invoice-header .invoice-details {
-            text-align: right;
-        }
-        .order-summary p {
-            margin-bottom: 3px;
-        }
-    </style>
-</head>
-<body>
+                .header h2 {
+                    font-size: 28px; /* Reduced font size */
+                    color: #333;
+                    margin-bottom: 8px; /* Reduced bottom margin */
+                }
+                .header p, .footer p {
+                    color: #666;
+                    margin: 2px 0; /* Reduced space between text */
+                }
+                .details h4, .items h4 {
+                    font-size: 20px; /* Reduced heading size */
+                    color: #333;
+                    border-bottom: 2px solid #eee;
+                    padding-bottom: 5px;
+                    margin-bottom: 10px;
+                }
+                .table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin-top: 10px;
+                }
+                .table th, .table td {
+                    padding: 8px;
+                    text-align: left;
+                    border-bottom: 1px solid #ddd;
+                    font-size: 14px; /* Reduced table font size */
+                }
+                .table th {
+                    background-color: #f8f9fa;
+                    color: #333;
+                    font-weight: 600;
+                }
+                .table tbody tr:hover {
+                    background-color: #f9f9f9;
+                }
+                .total {
+                    font-size: 16px; /* Reduced font size */
+                    font-weight: bold;
+                    text-align: right;
+                    color: #333;
+                }
+                .footer {
+                    text-align: center;
+                    border-top: 1px solid #eee;
+                    color: #666;
+                    padding-top: 10px;
+                }
+                .order-summary {
+                    border: 1px solid #ddd;
+                    border-radius: 8px;
+                    padding: 8px;
+                    margin-top: 10px;
+                    background-color: #f9f9f9;
+                }
+                .order-summary h5, .order-summary p {
+                    font-size: 14px; /* Reduced font size */
+                    color: #333;
+                    margin: 3px 0; /* Reduced margin */
+                }
+                .invoice-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                }
+                .invoice-header .invoice-details {
+                    text-align: right;
+                }
+                .order-summary p {
+                    margin-bottom: 3px;
+                }
+            </style>
+        </head>
+        <body>
 
-<div class="invoice-container">
-    <!-- Header -->
-    <div class="header">
-        <div class="invoice-header">
-            <div class="invoice-details">
-                <h2>Invoice</h2>
-                <p><strong>Order ID:</strong> {{ razorpay_order_id }}</p>
-                <p><strong>Date:</strong> {{ ordered_date|date:"b. j, Y, g:i a" }}</p> <!-- Shortened Date Format -->
+        <div class="invoice-container">
+            <!-- Header -->
+            <div class="header">
+                <div class="invoice-header">
+                    <div class="invoice-details">
+                        <h2>Invoice</h2>
+                        <p><strong>Order ID:</strong> {{ razorpay_order_id }}</p>
+                        <p><strong>Date:</strong> {{ ordered_date|date:"b. j, Y, g:i a" }}</p> <!-- Shortened Date Format -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Details -->
+            <div class="details">
+                <h4>Customer Details</h4>
+                <div class="order-summary">
+                    <p><strong>Name:</strong> {{ user.username|default:"N/A" }}</p>
+                    <p><strong>Email:</strong> {{ user.email|default:"N/A" }}</p>
+                    <p><strong>Address:</strong> {{ user.mobile|default:"N/A" }}</p>
+                    <p><strong>Mobile No:</strong> {{ user.mobile|default:"N/A" }}</p>
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="items">
+                <h4>Order Summary</h4>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in products %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ order.product.title|default:"N/A" }}</td>
+                            <td>{{ order.quantity|default:"N/A" }}</td>
+                            <td>{{ item.discounted_price|default:"N/A" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        <!-- Payment Details -->
+        <div class="details">
+            <h4>Payment Details</h4>
+            <div class="order-summary">
+                <p><strong>Payment ID:</strong> {{ razorpay_payment_id|default:"N/A" }}</p>
+                <p><strong>Status:</strong> 
+                    {% if razorpay_payment_status == "Delivered" %}
+                        <span class="text-success">Paid</span>
+                    {% else %}
+                        <span class="text-danger">Delivered</span>
+                    {% endif %}
+                </p>
+                <div class="total-line"><strong>Shipping Fee:</strong> 40</div>
+            </div>
+                <p class="total">Grand Total: {{ amount|add:"40" }}</p>
             </div>
         </div>
-    </div>
 
-    <!-- Customer Details -->
-    <div class="details">
-        <h4>Customer Details</h4>
-        <div class="order-summary">
-            <p><strong>Name:</strong> {{ user.username|default:"N/A" }}</p>
-            <p><strong>Email:</strong> {{ user.email|default:"N/A" }}</p>
-            <p><strong>Address:</strong> {{ user.mobile|default:"N/A" }}</p>
-            <p><strong>Mobile No:</strong> {{ user.mobile|default:"N/A" }}</p>
+        <!-- Footer -->
+        <div class="footer">
+            <p>Thank you for your purchase! We hope to serve you again soon.</p>
         </div>
     </div>
 
-    <!-- Order Items -->
-    <div class="items">
-        <h4>Order Summary</h4>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in products %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ order.product.title|default:"N/A" }}</td>
-                    <td>{{ order.quantity|default:"N/A" }}</td>
-                    <td>{{ item.discounted_price|default:"N/A" }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Payment Details -->
-    <div class="details">
-        <h4>Payment Details</h4>
-        <div class="order-summary">
-            <p><strong>Payment ID:</strong> {{ razorpay_payment_id|default:"N/A" }}</p>
-            <p><strong>Status:</strong> 
-                {% if razorpay_payment_status == "Delivered" %}
-                    <span class="text-success">Paid</span>
-                {% else %}
-                    <span class="text-danger">Delivered</span>
-                {% endif %}
-            </p>
-             <div class="total-line"><strong>Shipping Fee:</strong> 40</div>
-          </div>
-            <p class="total">Grand Total: {{ amount|add:"40" }}</p>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <div class="footer">
-        <p>Thank you for your purchase! We hope to serve you again soon.</p>
-    </div>
-</div>
-
-</body>
-</html>
+    </body>
+    </html> 
