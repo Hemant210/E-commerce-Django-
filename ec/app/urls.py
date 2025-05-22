@@ -39,6 +39,8 @@ urlpatterns = [
     path('removecart/', views.remove_cart, name='removecart'), 
     path('pluswishlist', views.plus_wishlist, name='plus-wishlist'),
     path('minuswishlist', views.minus_wishlist, name='minus-wishlist'),
+    path('chatbot/', views.chatbot, name='chatbot'),
+
 
     path('passwordchangedone/', auth_view.PasswordChangeDoneView.as_view(
     template_name='app/passwordchangedone.html'), name='passwordchangedone'),

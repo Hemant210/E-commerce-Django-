@@ -214,6 +214,7 @@ def address(request):
     addresses = Customer.objects.filter(user=request.user) 
     return render(request, "app/address.html", {'add': addresses}) 
 
+@login_required
 @method_decorator(login_required, name='dispatch')
 class checkout(View):
     def get(self, request):
@@ -746,6 +747,14 @@ def generate_recommendations(user_id, limit=6):
     rec_obj.recommended_products.set(recommendations)
     rec_obj.save()
     return recommendations
+
+def chatbot(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        user_message = data.get('message', '')
+        # Basic mock reply
+        bot_reply = f"You said: {user_message}"
+        return JsonResponse({'response': bot_reply})
 
 # def run_stock_forecast_alert():
     data = OrderPlaced.objects.values('product_id', 'ordered_date', 'quantity')
